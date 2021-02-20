@@ -17,30 +17,43 @@ public final class InputManager {
     private final IInterface manager;
     private Method injectInputEventMethod;
 
+    private static Method setDisplayIdMethod;
+
     public InputManager(IInterface manager) {
         this.manager = manager;
     }
 
-    private Method getInjectInputEventMethod() {
+    private Method getInjectInputEventMethod() throws NoSuchMethodException {
         if (injectInputEventMethod == null) {
-            try {
-                injectInputEventMethod = manager.getClass().getMethod("injectInputEvent", InputEvent.class, int.class);
-            } catch (NoSuchMethodException e) {
-                Ln.e("Could not find method", e);
-            }
+            injectInputEventMethod = manager.getClass().getMethod("injectInputEvent", InputEvent.class, int.class);
         }
         return injectInputEventMethod;
     }
 
     public boolean injectInputEvent(InputEvent inputEvent, int mode) {
-        Method method = getInjectInputEventMethod();
-        if (method == null) {
+        try {
+            Method method = getInjectInputEventMethod();
+            return (boolean) method.invoke(manager, inputEvent, mode);
+        } catch (InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
+            Ln.e("Could not invoke method", e);
             return false;
         }
+    }
+
+    private static Method getSetDisplayIdMethod() throws NoSuchMethodException {
+        if (setDisplayIdMethod == null) {
+            setDisplayIdMethod = InputEvent.class.getMethod("setDisplayId", int.class);
+        }
+        return setDisplayIdMethod;
+    }
+
+    public static boolean setDisplayId(InputEvent inputEvent, int displayId) {
         try {
-            return (Boolean) method.invoke(manager, inputEvent, mode);
-        } catch (InvocationTargetException | IllegalAccessException e) {
-            Ln.e("Could not invoke " + method.getName(), e);
+            Method method = getSetDisplayIdMethod();
+            method.invoke(inputEvent, displayId);
+            return true;
+        } catch (InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
+            Ln.e("Cannot associate a display id to the input event", e);
             return false;
         }
     }

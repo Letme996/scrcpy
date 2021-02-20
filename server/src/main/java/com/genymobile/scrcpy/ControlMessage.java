@@ -15,6 +15,7 @@ public final class ControlMessage {
     public static final int TYPE_GET_CLIPBOARD = 7;
     public static final int TYPE_SET_CLIPBOARD = 8;
     public static final int TYPE_SET_SCREEN_POWER_MODE = 9;
+    public static final int TYPE_ROTATE_DEVICE = 10;
 
     private int type;
     private String text;
@@ -27,15 +28,18 @@ public final class ControlMessage {
     private Position position;
     private int hScroll;
     private int vScroll;
+    private boolean paste;
+    private int repeat;
 
     private ControlMessage() {
     }
 
-    public static ControlMessage createInjectKeycode(int action, int keycode, int metaState) {
+    public static ControlMessage createInjectKeycode(int action, int keycode, int repeat, int metaState) {
         ControlMessage msg = new ControlMessage();
         msg.type = TYPE_INJECT_KEYCODE;
         msg.action = action;
         msg.keycode = keycode;
+        msg.repeat = repeat;
         msg.metaState = metaState;
         return msg;
     }
@@ -47,8 +51,7 @@ public final class ControlMessage {
         return msg;
     }
 
-    public static ControlMessage createInjectTouchEvent(int action, long pointerId, Position position, float pressure,
-            int buttons) {
+    public static ControlMessage createInjectTouchEvent(int action, long pointerId, Position position, float pressure, int buttons) {
         ControlMessage msg = new ControlMessage();
         msg.type = TYPE_INJECT_TOUCH_EVENT;
         msg.action = action;
@@ -68,10 +71,11 @@ public final class ControlMessage {
         return msg;
     }
 
-    public static ControlMessage createSetClipboard(String text) {
+    public static ControlMessage createSetClipboard(String text, boolean paste) {
         ControlMessage msg = new ControlMessage();
         msg.type = TYPE_SET_CLIPBOARD;
         msg.text = text;
+        msg.paste = paste;
         return msg;
     }
 
@@ -133,5 +137,13 @@ public final class ControlMessage {
 
     public int getVScroll() {
         return vScroll;
+    }
+
+    public boolean getPaste() {
+        return paste;
+    }
+
+    public int getRepeat() {
+        return repeat;
     }
 }
